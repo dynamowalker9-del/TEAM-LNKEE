@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="refresh" content="900">
+  <title>Planets — Cosmic Watch</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/nav-menu.css">
+</head>
+<body>
+  <!-- TOP-CENTER NAVIGATION -->
+  <nav class="nav-menu top-nav" role="navigation" aria-label="Main">
+    <ul class="nav-list">
+      <li><a href="/" class="nav-link" data-section="dashboard">🏠 Home</a></li>
+      <li><a href="/planets" class="nav-link" data-section="planets">🪐 Planets</a></li>
+      <li><a href="#asteroid-table" class="nav-link" data-section="asteroids">🌑 Asteroids</a></li>
+      <li><a href="#stats" class="nav-link" data-section="stats">📈 Stats</a></li>
+    </ul>
+  </nav>
+
+  <main class="scene" style="padding:3rem;">
+    <header class="header-row">
+      <h1>🪐 <span>Planets</span></h1>
+      <div class="updated">Last updated: {{ updated or '—' }}</div>
+    </header>
+
+    <section class="planets-grid" style="margin-top:1rem; display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:1rem;">
+      {% for p in planets %}
+        <article class="planet-card" style="background: rgba(2,6,23,0.6); padding:1rem; border-radius:12px;">
+          <div style="display:flex; align-items:center; gap:0.8rem;">
+            <div style="font-size:2.8rem;">{{ p.emoji }}</div>
+            <div>
+              <div style="font-weight:700; font-size:1.1rem;">{{ p.name }}</div>
+              <div style="color:#93c5fd; font-size:0.9rem;">{{ p.composition }}</div>
+            </div>
+          </div>
+          <div style="margin-top:0.8rem; display:grid; grid-template-columns: repeat(2, 1fr); gap:0.5rem;">
+            <div style="background:rgba(255,255,255,0.03); padding:0.6rem; border-radius:8px;">Radius: <strong>{{ p.radius_km }} km</strong></div>
+            <div style="background:rgba(255,255,255,0.03); padding:0.6rem; border-radius:8px;">Mass: <strong>{{ p['mass_10^24kg'] }} x10^24 kg</strong></div>
+            <div style="background:rgba(255,255,255,0.03); padding:0.6rem; border-radius:8px;">Gravity: <strong>{{ p.gravity_m_s2 }} m/s²</strong></div>
+            <div style="background:rgba(255,255,255,0.03); padding:0.6rem; border-radius:8px;">Moons: <strong>{{ p.moons }}</strong></div>
+            <div style="background:rgba(255,255,255,0.03); padding:0.6rem; border-radius:8px;">Orbit: <strong>{{ p.orbital_period_days }} days</strong></div>
+            <div style="background:rgba(255,255,255,0.03); padding:0.6rem; border-radius:8px;">Distance: <strong>{{ p.distance_mkm }} mkm</strong></div>
+          </div>
+          <div style="margin-top:0.8rem; display:flex; gap:0.6rem; align-items:center; justify-content:space-between;">
+            <div style="color:#c7d2fe; font-size:0.95rem;">Atmosphere: <em style="color:#93c5fd;">{{ p.atmosphere }}</em></div>
+            <div style="text-align:right; font-size:0.9rem; color:#fef3c7;">Temp: <strong>{{ p.surface_temp_c }} °C</strong></div>
+          </div>
+          <div style="margin-top:0.8rem; padding-top:0.6rem; border-top:1px solid rgba(148,163,184,0.04); color:#e6f6ff;">
+            <strong>Fun fact:</strong> {{ p.fun_fact }}
+          </div>
+          <details style="margin-top:0.6rem; background:rgba(255,255,255,0.02); padding:0.6rem; border-radius:8px;">
+            <summary style="cursor:pointer; color:#93c5fd;">🔍 Full details</summary>
+            <pre style="white-space:pre-wrap; color:#dbeafe; font-size:0.85rem; margin-top:0.6rem;">{{ p | tojson(indent=2) }}</pre>
+          </details>
+        </article>
+      {% endfor %}
+    </section>
+
+  </main>
+
+  <script src="/static/nav-menu.js"></script>
+</body>
+</html>

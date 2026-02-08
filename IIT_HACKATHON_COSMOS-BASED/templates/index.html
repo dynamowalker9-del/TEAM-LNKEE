@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="refresh" content="900">
+  <title>Cosmic Watch Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css"><link rel="stylesheet" href="/static/nav-menu.css">
+</head>
+<body>
+  <!-- TOP-CENTER NAVIGATION -->
+  <nav class="nav-menu top-nav" role="navigation" aria-label="Main">
+    <ul class="nav-list">
+      <li><a href="/" class="nav-link" data-section="dashboard">🏠 Home</a></li>
+      <li><a href="/planets" class="nav-link" data-section="planets">🪐 Planets</a></li>
+      <li><a href="#asteroid-table" class="nav-link" data-section="asteroids">🌑 Asteroids</a></li>
+      <li><a href="#stats" class="nav-link" data-section="stats">📈 Stats</a></li>
+    </ul>
+  </nav>
+
+  <!-- ASTEROID FIELD -->
+  <div class="nebula" aria-hidden="true"></div>
+  <div class="asteroid-field">
+    <span class="asteroid a1"></span>
+    <span class="asteroid a2"></span>
+    <span class="asteroid a3"></span>
+    <span class="meteor m1"></span>
+    <span class="meteor m2"></span>
+  </div>
+
+  <!-- ORBITAL SYSTEM BACKGROUND -->
+  <div class="orbital-system" aria-hidden="true">
+    <div class="sun"></div>
+    <div class="orbit orbit-1">
+      <div class="planet planet-small planet-orange"></div>
+    </div>
+    <div class="orbit orbit-2">
+      <div class="planet planet-med planet-red"></div>
+    </div>
+    <div class="orbit orbit-3">
+      <div class="planet planet-large planet-blue"></div>
+    </div>
+    <div class="orbit orbit-4">
+      <div class="planet planet-med planet-yellow"></div>
+    </div>
+    <div class="orbit orbit-5">
+      <div class="planet planet-large planet-brown"></div>
+    </div>
+    <div class="orbit orbit-6">
+      <div class="planet planet-med planet-cyan"></div>
+    </div>
+  </div>
+
+
+
+  <!-- MAIN DASHBOARD -->
+  <div class="scene" id="dashboard">
+    <header class="header-row">
+      <h1>☄️ <span>VOID-X</span></h1>
+      <div class="updated">Last updated: {{ updated or '—' }}</div>
+    </header>
+
+    <!-- PLANETS SECTION -->
+    <section class="planets" id="planets-section">
+      {% for p in planets %}
+        <div class="planet-card">
+          <div class="planet-emoji">{{ p.emoji }}</div>
+          <div class="planet-name">{{ p.name }}</div>
+          <div class="planet-desc">{{ p.desc }}</div>
+          <div class="planet-stats">
+            <span>Radius: {{ p.radius_km }} km</span>
+            <span>Mass: {{ p['mass_10^24kg'] }} x10^24kg</span>
+            <span>Dist: {{ p.distance_mkm }} mkm</span>
+          </div>
+        </div>
+      {% endfor %}
+    </section>
+
+    <section class="cards">
+      <div class="card">
+        <div class="card-title">Total Asteroids</div>
+        <div class="card-value">{{ asteroids|length }}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Potentially Hazardous</div>
+        <div class="card-value">{{ asteroids|selectattr('hazardous')|list|length }}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Refresh Interval</div>
+        <div class="card-value">10 min</div>
+      </div>
+    </section>
+
+    <!-- DEV PANEL -->
+    <section class="dev-panel">
+      <h3>🧠 Dev Monitor</h3>
+      <ul id="dev-log">
+        <li>Server time: {{ updated or '—' }}</li>
+      </ul>
+    </section>
+
+    <!-- STATS -->
+    <section id="stats" class="dev-panel" style="margin-bottom:1.6rem;">
+      <h3>📊 Speed Statistics</h3>
+      <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+        <div style="flex:1 1 420px; background:rgba(255,255,255,0.02); padding:0.9rem; border-radius:10px;">
+          <h4 style="margin:0 0 0.6rem 0; color:#93c5fd;">Planet orbital speeds</h4>
+          <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+            <thead>
+              <tr style="text-align:left; color:#c7d2fe;"><th>Planet</th><th>Speed (km/s)</th><th>Speed (km/h)</th><th>Orbit (days)</th></tr>
+            </thead>
+            <tbody>
+              {% for ps in planet_speeds %}
+                <tr>
+                  <td style="padding:6px 8px">{{ ps.emoji }} {{ ps.name }}</td>
+                  <td style="padding:6px 8px">{{ ps.speed_km_s }}</td>
+                  <td style="padding:6px 8px">{{ ps.speed_km_h }}</td>
+                  <td style="padding:6px 8px">{{ ps.orbital_period_days }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div style="flex:1 1 320px; background:rgba(255,255,255,0.02); padding:0.9rem; border-radius:10px;">
+          <h4 style="margin:0 0 0.6rem 0; color:#93c5fd;">Asteroid velocity summary</h4>
+          <div style="font-size:0.95rem; color:#e6f6ff;">
+            <div>Count: <strong>{{ asteroid_stats.count }}</strong></div>
+            <div>Average speed: <strong>{{ asteroid_stats.avg_km_s }} km/s</strong></div>
+            <div>Min speed: <strong>{{ asteroid_stats.min_km_s }} km/s</strong></div>
+            <div>Max speed: <strong>{{ asteroid_stats.max_km_s }} km/s</strong></div>
+          </div>
+          <div style="margin-top:0.8rem;">
+            <strong>Top 5 fastest:</strong>
+            <ol style="margin:0.4rem 0 0 1.2rem; color:#dbeafe;">
+              {% for a in asteroid_stats.top_5 %}
+                <li>{{ a.name }} — {{ a.velocity }} km/s</li>
+              {% endfor %}
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABLE -->
+    <div class="table-wrapper" id="asteroid-table">
+      <div class="controls">
+        <input id="search" type="search" placeholder="Search name..." aria-label="Search asteroids">
+        <select id="filter-hazard" aria-label="Filter hazardous">
+          <option value="all">All</option>
+          <option value="hazard">Hazardous</option>
+          <option value="safe">Safe</option>
+        </select>
+        <select id="sort-by" aria-label="Sort by">
+          <option value="name">Sort: Name</option>
+          <option value="diameter">Diameter</option>
+          <option value="velocity">Velocity</option>
+          <option value="distance">Distance</option>
+        </select>
+        <button id="clear-filters" class="btn-ghost">Clear</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Diameter</th>
+            <th>Velocity</th>
+            <th>Miss Distance</th>
+            <th>Threat</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if asteroids and asteroids|length > 0 %}
+            {% for a in asteroids %}
+              <tr>
+                <td>{{ a.name }}</td>
+                <td>{{ a.diameter }} m</td>
+                <td>{{ a.velocity }} km/s</td>
+                <td>{{ "{:,}".format(a.distance) }} km</td>
+                <td class="{{ 'status-danger' if a.hazardous else 'status-safe' }}">{{ 'Hazard' if a.hazardous else 'Safe' }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="5" class="empty-state">No asteroid data available — try refreshing the page or check your API connection.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+    <script src="/static/dashboard.js"></script>
+  </div>
+
+  <!-- object details removed -->
+</body>
+
+</html>
+
+
